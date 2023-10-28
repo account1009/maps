@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Maps</title>
+</head>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+
+<style type="text/css" media="screen">
+  html,body{
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  #map{
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+  }
+
+  .leaflet-div-icon{
+    background: transparent;
+    border: 0;
+  }
+  .marker{
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    background: #0084ff;
+    border-radius: 20px;
+    opacity: 0.6;
+    margin-bottom: 10px;
+    margin-left: -10px;
+  }
+</style>
+
+<script>
+  $(function() {
+
+    var map = L.map('map').setView([40, 20], 2);
+    var standard_tiles = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    var hd_tiles = 'https://tile.osmand.net/hd/{z}/{x}/{y}.png'
+
+    L.tileLayer(hd_tiles, {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var cool_tags = {
+      'baduk': {'key': 'club', 'value': 'baduk'},
+      'board_games': {'key': 'club', 'value': 'board_games'},
+      'live_music': {'key': 'live_music', 'value': 'yes'},
+    }
+
+    var query_string = window.location.search;
+    var url_params = new URLSearchParams(query_string);
+    var selected_tag = url_params.get('m')
+
+    var query = '[out:json][timeout:25];nwr["' + cool_tags[selected_tag]['key'] + '"="'  + cool_tags[selected_tag]['value'] + '"];out geom;';
+    var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
+      var elements = data['elements']
+      console.log(elements)
+      for (var i = 0; i < elements.length; i++) {
+        var el = elements[i]
+        var popup_content = '';
+        var name_content = '<div><b>' + el['tags']['name'] +'</b></div>'
+
+        popup_content = popup_content + name_content;
+
+        if (el['lat'] && el['lon']) {
+          if (el['tags']['contact:instagram']) {
+            base_instagram = el['tags']['contact:instagram'].split('/').filter(i => i).pop()
+            instagram_content = '<div>Instagram: <a target="_blank" href="https://www.instagram.com/' + base_instagram + '">' + base_instagram + '</a></div>';
+            popup_content = popup_content + instagram_content;
+          }
+
+          if (el['tags']['opening_hours']) {
+            var content = '<div>Opening Hours: ' + el['tags']['opening_hours'] +'</div>';
+            popup_content = popup_content + content;
+          }
+
+          if (el['tags']['website']) {
+            content = '<div>Website: <a target="_blank" href="https://www.instagram.com/' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
+            popup_content = popup_content + content;
+          }
+
+          var icon = L.divIcon({
+            iconSize: "auto",
+            html: '<div class="marker"></div>'
+          })
+          L.marker([el['lat'], el['lon']], {icon: icon}).addTo(map).bindPopup(popup_content)          
+        }
+      }
+    });
+    
+
+  });
+</script>
+
+<body>
+
+<div id="map"></div>
+
+</body>
+</html>
