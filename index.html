@@ -63,7 +63,6 @@
     var query = '[out:json][timeout:25];nwr["' + cool_tags[selected_tag]['key'] + '"="'  + cool_tags[selected_tag]['value'] + '"];out geom;';
     var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
       var elements = data['elements']
-      console.log(elements)
       for (var i = 0; i < elements.length; i++) {
         var el = elements[i]
         var popup_content = '';
