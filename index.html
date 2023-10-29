@@ -31,11 +31,37 @@
     display: inline-block;
     height: 20px;
     width: 20px;
-    background: #0084ff;
+    background: #0084ff9c;
     border-radius: 20px;
-    opacity: 0.6;
     margin-bottom: 10px;
     margin-left: -10px;
+    box-shadow: 0px 0px 0px 1px #00407cc4;
+  }
+
+  @keyframes animate_loader {
+    0% {
+      opacity: 0.7;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+
+    100% {
+      opacity: 0.7;
+    }
+  }
+  #loader{
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background: black;
+    top: 0px;
+    left: 0px;
+    z-index: 1000;
+    opacity: 0.7;
+    animation: animate_loader 1.5s infinite;
+    animation-timing-function: ease-in-out;
   }
 </style>
 
@@ -83,7 +109,7 @@
           }
 
           if (el['tags']['website']) {
-            content = '<div>Website: <a target="_blank" href="https://www.instagram.com/' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
+            content = '<div>Website: <a target="_blank" href="' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
             popup_content = popup_content + content;
           }
 
@@ -91,7 +117,8 @@
             iconSize: "auto",
             html: '<div class="marker"></div>'
           })
-          L.marker([el['lat'], el['lon']], {icon: icon}).addTo(map).bindPopup(popup_content)          
+          L.marker([el['lat'], el['lon']], {icon: icon}).addTo(map).bindPopup(popup_content);
+          $('#loader').hide();
         }
       }
     });
@@ -102,6 +129,7 @@
 
 <body>
 
+<div id="loader"></div>
 <div id="map"></div>
 
 </body>
