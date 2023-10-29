@@ -147,7 +147,17 @@
 
         popup_content = popup_content + name_content;
 
+        var lat;
+        var lon;
         if (el['lat'] && el['lon']) {
+          lat = el['lat'];
+          lon = el['lon'];
+        } else if (el['bounds']) {
+          lat = (el['bounds']['minlat'] + el['bounds']['maxlat']) / 2;
+          lon = (el['bounds']['minlon'] + el['bounds']['maxlon']) / 2;
+        }
+
+        if (lat && lon) {
           if (el['tags']['contact:instagram']) {
             is_cool = 1
             base_instagram = el['tags']['contact:instagram'].split('/').filter(i => i).pop()
@@ -177,7 +187,7 @@
           } else {
             icon = not_cool_icon;
           }
-          L.marker([el['lat'], el['lon']], {icon: icon}).addTo(map).bindPopup(popup_content);
+          L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);
           $('#loader').hide();
         }
       }
