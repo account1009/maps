@@ -16,6 +16,10 @@
     height: 100%;
     width: 100%;
     margin: 0;
+    font-family: sans-serif;
+  }
+  a{
+    color: white;
   }
   #map{
     height: 100%;
@@ -31,7 +35,7 @@
   .leaflet-control{
     display: none;
   }
-  .marker{
+  .marker, .marker_low_visibility{
     display: inline-block;
     height: 20px;
     width: 20px;
@@ -40,6 +44,10 @@
     margin-bottom: 10px;
     margin-left: -10px;
     box-shadow: 0px 0px 0px 1px #00407cc4;
+  }
+
+  .marker_low_visibility{
+    opacity: 0.5;
   }
 
   @keyframes animate_loader {
@@ -67,6 +75,28 @@
     animation: animate_loader 1.5s infinite;
     animation-timing-function: ease-in-out;
   }
+
+  #summary{
+    position: fixed;
+    height: auto;
+    width: calc(100% - 24px);
+    top: 0px;
+    left: 0px;
+    z-index: 3000;
+    background: #0000008c;
+    color: white;
+    padding: 12px;
+    text-align: center;
+  }
+
+  #cool_factor{
+    font-size: 12px;
+    padding-top: 8px;
+  }
+
+  .main_topic{
+    color: #cde5ff;
+  }
 </style>
 
 <script>
@@ -81,14 +111,28 @@
     }).addTo(map);
 
     var cool_tags = {
-      'baduk': {'key': 'club', 'value': 'baduk'},
-      'board_games': {'key': 'club', 'value': 'board_games'},
-      'live_music': {'key': 'live_music', 'value': 'yes'},
+      'baduk': {'key': 'club', 'value': 'baduk', 'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dbaduk', 'name': 'Baduk (Go) clubs'},
+      'board_games': {'key': 'club', 'value': 'board_games', 'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dboard_games', 'name': 'Board games clubs'},
+      'live_music': {'key': 'live_music', 'value': 'yes', 'wiki': 'https://wiki.openstreetmap.org/wiki/Key:live_music', 'name': 'Live music locations'},
     }
 
     var query_string = window.location.search;
     var url_params = new URLSearchParams(query_string);
     var selected_tag = url_params.get('m')
+
+    var summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
+
+    document.title = cool_tags[selected_tag]['name'] + ' - map'
+    $('#summary_intro').html(summary);
+
+    var cool_icon = L.divIcon({
+      iconSize: "auto",
+      html: '<div class="marker"></div>'
+    })
+    var not_cool_icon = L.divIcon({
+      iconSize: "auto",
+      html: '<div class="marker_low_visibility"></div>'
+    })
 
     var query = '[out:json][timeout:25];nwr["' + cool_tags[selected_tag]['key'] + '"="'  + cool_tags[selected_tag]['value'] + '"];out geom;';
     var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
@@ -96,15 +140,26 @@
       for (var i = 0; i < elements.length; i++) {
         var el = elements[i]
         var popup_content = '';
-        var name_content = '<div><b>' + el['tags']['name'] +'</b></div>'
+
+        var name = el['tags']['name'] || ''
+        var name_content = '<div><b>' + name +'</b></div>'
+        var is_cool = 0
 
         popup_content = popup_content + name_content;
 
         if (el['lat'] && el['lon']) {
           if (el['tags']['contact:instagram']) {
+            is_cool = 1
             base_instagram = el['tags']['contact:instagram'].split('/').filter(i => i).pop()
             instagram_content = '<div>Instagram: <a target="_blank" href="https://www.instagram.com/' + base_instagram + '">' + base_instagram + '</a></div>';
             popup_content = popup_content + instagram_content;
+          }
+
+          if (el['tags']['contact:tiktok']) {
+            is_cool = 1
+            base_tiktok = el['tags']['contact:tiktok'].split('/').filter(i => i).pop()
+            tiktok_content = '<div>tiktok: <a target="_blank" href="https://www.tiktok.com/@' + base_tiktok + '">' + base_tiktok + '</a></div>';
+            popup_content = popup_content + tiktok_content;
           }
 
           if (el['tags']['opening_hours']) {
@@ -116,11 +171,12 @@
             content = '<div>Website: <a target="_blank" href="' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
             popup_content = popup_content + content;
           }
-
-          var icon = L.divIcon({
-            iconSize: "auto",
-            html: '<div class="marker"></div>'
-          })
+          var icon;
+          if (is_cool == 1) {
+            icon = cool_icon;
+          } else {
+            icon = not_cool_icon;
+          }
           L.marker([el['lat'], el['lon']], {icon: icon}).addTo(map).bindPopup(popup_content);
           $('#loader').hide();
         }
@@ -133,6 +189,12 @@
 
 <body>
 
+<div id="summary">
+  <div id="summary_intro"></div>
+  <div id="cool_factor">
+    The places without an Instagram or TikTok contact are more transparent because it is quite sure they are not cool enough 
+  </div>
+</div>
 <div id="loader"></div>
 <div id="map"></div>
 
