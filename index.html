@@ -39,11 +39,12 @@
     display: inline-block;
     height: 20px;
     width: 20px;
-    background: #0084ff9c;
+    background: #2a2a2a9c;
     border-radius: 20px;
     margin-bottom: 10px;
     margin-left: -10px;
-    box-shadow: 0px 0px 0px 1px #00407cc4;
+/*    box-shadow: 0px 0px 0px 1px #00407cc4;*/
+    box-shadow: 0px 0px 0px 1px #0000007a;
   }
 
   .marker_low_visibility{
@@ -100,6 +101,21 @@
 </style>
 
 <script>
+
+  function check_category(data, tags) {
+    for (var i = 0; i < tags.length; i++) {
+      var tag = tags[i];
+      var key = tag['key'];
+      var value = tag['value']
+      if (data[key]) {
+        if (data[key] == value) {
+          return tag['color'];
+        }
+      }
+    }
+    return '#8e8e8e9c';
+  }
+
   $(function() {
 
     var map = L.map('map').setView([40, 20], 2);
@@ -112,7 +128,7 @@
 
     var cool_tags = {
       'baduk': {
-        'elements': [{'key': 'club', 'value': 'baduk'}],
+        'elements': [{'key': 'club', 'value': 'baduk', 'color': '#0084ffcf'}],
         'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dbaduk',
         'name': 'Baduk (Go) clubs'
       },
@@ -120,17 +136,17 @@
         'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club=board_games',
         'name': 'Board games clubs/cafes/pubs',
         'elements': [
-          {'key': 'club', 'value': 'board_games', 'category': 'club'},
-          {'key': 'cafe', 'value': 'board_game', 'category': 'cafe'},
-          {'key': 'pub', 'value': 'board_game', 'category': 'pub'},
+          {'key': 'club', 'value': 'board_games', 'color': '#0084ffcf'},
+          {'key': 'cafe', 'value': 'board_game', 'color': '#ff0000cf'},
+          {'key': 'pub', 'value': 'board_game', 'color': '#ffa600cf'},
         ]},
       'live_music': {
-        'elements': [{'key': 'live_music', 'value': 'yes'}],
+        'elements': [{'key': 'live_music', 'value': 'yes', 'color': '#0084ffcf'}],
         'wiki': 'https://wiki.openstreetmap.org/wiki/Key:live_music',
         'name': 'Live music locations',
       },
       'chess': {
-        'elements': [{'key': 'club', 'value': 'chess'}],
+        'elements': [{'key': 'club', 'value': 'chess', 'color': '#0084ffcf'}],
         'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club=chess',
         'name': 'Chess clubs',
       },
@@ -142,8 +158,10 @@
 
     var summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
 
-    document.title = cool_tags[selected_tag]['name'] + ' - map'
+    document.title = cool_tags[selected_tag]['name'] + ' - map';
     $('#summary_intro').html(summary);
+
+    var icons = {};
 
     var cool_icon = L.divIcon({
       iconSize: "auto",
@@ -154,16 +172,18 @@
       html: '<div class="marker_low_visibility"></div>'
     });
 
+    var elements_in_category = cool_tags[selected_tag]['elements'];
 
-    var n_elements = cool_tags[selected_tag]['elements'].length;
+    var n_elements = elements_in_category.length;
     var done_elements = 0;
     for (var j = 0; j < n_elements; j++) {
-      el = cool_tags[selected_tag]['elements'][j];
-      var query = '[out:json][timeout:25];nwr["' + el['key'] + '"="'  + el['value'] + '"];out geom;';
+      categories = elements_in_category[j];
+      var query = '[out:json][timeout:25];nwr["' + categories['key'] + '"="'  + categories['value'] + '"];out geom;';
       var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
         var elements = data['elements'];
         for (var i = 0; i < elements.length; i++) {
           var el = elements[i];
+          var color = check_category(el['tags'], elements_in_category);
           var popup_content = '';
 
           var name = el['tags']['name'] || '';
@@ -217,7 +237,12 @@
 
             var icon;
             if (is_cool == 1) {
-              icon = cool_icon;
+
+              icon = L.divIcon({
+                iconSize: "auto",
+                html: '<div class="marker" style="background: ' + color + '"></div>'
+              });
+              // icon = cool_icon;
             } else {
               icon = not_cool_icon;
             }
