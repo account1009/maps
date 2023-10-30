@@ -111,9 +111,29 @@
     }).addTo(map);
 
     var cool_tags = {
-      'baduk': {'key': 'club', 'value': 'baduk', 'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dbaduk', 'name': 'Baduk (Go) clubs'},
-      'board_games': {'key': 'club', 'value': 'board_games', 'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dboard_games', 'name': 'Board games clubs'},
-      'live_music': {'key': 'live_music', 'value': 'yes', 'wiki': 'https://wiki.openstreetmap.org/wiki/Key:live_music', 'name': 'Live music locations'},
+      'baduk': {
+        'elements': [{'key': 'club', 'value': 'baduk'}],
+        'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club%3Dbaduk',
+        'name': 'Baduk (Go) clubs'
+      },
+      'board_games': {
+        'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club=board_games',
+        'name': 'Board games clubs/cafes/pubs',
+        'elements': [
+          {'key': 'club', 'value': 'board_games', 'category': 'club'},
+          {'key': 'cafe', 'value': 'board_game', 'category': 'cafe'},
+          {'key': 'pub', 'value': 'board_game', 'category': 'pub'},
+        ]},
+      'live_music': {
+        'elements': [{'key': 'live_music', 'value': 'yes'}],
+        'wiki': 'https://wiki.openstreetmap.org/wiki/Key:live_music',
+        'name': 'Live music locations',
+      },
+      'chess': {
+        'elements': [{'key': 'club', 'value': 'chess'}],
+        'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club=chess',
+        'name': 'Chess clubs',
+      },
     }
 
     var query_string = window.location.search;
@@ -128,70 +148,90 @@
     var cool_icon = L.divIcon({
       iconSize: "auto",
       html: '<div class="marker"></div>'
-    })
+    });
     var not_cool_icon = L.divIcon({
       iconSize: "auto",
       html: '<div class="marker_low_visibility"></div>'
-    })
+    });
 
-    var query = '[out:json][timeout:25];nwr["' + cool_tags[selected_tag]['key'] + '"="'  + cool_tags[selected_tag]['value'] + '"];out geom;';
-    var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
-      var elements = data['elements']
-      for (var i = 0; i < elements.length; i++) {
-        var el = elements[i]
-        var popup_content = '';
 
-        var name = el['tags']['name'] || ''
-        var name_content = '<div><b>' + name +'</b></div>'
-        var is_cool = 0
+    var n_elements = cool_tags[selected_tag]['elements'].length;
+    var done_elements = 0;
+    for (var j = 0; j < n_elements; j++) {
+      el = cool_tags[selected_tag]['elements'][j];
+      var query = '[out:json][timeout:25];nwr["' + el['key'] + '"="'  + el['value'] + '"];out geom;';
+      var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
+        var elements = data['elements'];
+        for (var i = 0; i < elements.length; i++) {
+          var el = elements[i];
+          var popup_content = '';
 
-        popup_content = popup_content + name_content;
+          var name = el['tags']['name'] || '';
+          var name_content = '<div><b>' + name +'</b></div>';
+          var is_cool = 0;
 
-        var lat;
-        var lon;
-        if (el['lat'] && el['lon']) {
-          lat = el['lat'];
-          lon = el['lon'];
-        } else if (el['bounds']) {
-          lat = (el['bounds']['minlat'] + el['bounds']['maxlat']) / 2;
-          lon = (el['bounds']['minlon'] + el['bounds']['maxlon']) / 2;
+          popup_content = popup_content + name_content;
+
+          var lat;
+          var lon;
+          if (el['lat'] && el['lon']) {
+            lat = el['lat'];
+            lon = el['lon'];
+          } else if (el['bounds']) {
+            lat = (el['bounds']['minlat'] + el['bounds']['maxlat']) / 2;
+            lon = (el['bounds']['minlon'] + el['bounds']['maxlon']) / 2;
+          }
+
+          if (lat && lon) {
+            if (el['tags']['contact:instagram']) {
+              is_cool = 1;
+              var base_instagram = el['tags']['contact:instagram'].split('/').filter(i => i).pop();
+              var instagram_content = '<div>Instagram: <a target="_blank" href="https://www.instagram.com/' + base_instagram + '">' + base_instagram + '</a></div>';
+              popup_content = popup_content + instagram_content;
+            }
+
+            if (el['tags']['contact:tiktok']) {
+              is_cool = 1;
+              var base_tiktok = el['tags']['contact:tiktok'].split('/').filter(i => i).pop();
+              var tiktok_content = '<div>tiktok: <a target="_blank" href="https://www.tiktok.com/@' + base_tiktok + '">' + base_tiktok + '</a></div>';
+              popup_content = popup_content + tiktok_content;
+            }
+
+            if (el['tags']['contact:facebook']) {
+              is_cool = 1;
+              var base_facebook = el['tags']['contact:facebook'].split('/').filter(i => i).pop();
+              var facebook_content = '<div>Facebook: <a target="_blank" href="https://www.facebook.com/' + base_facebook + '">' + base_facebook + '</a></div>';
+              popup_content = popup_content + facebook_content;
+            }
+
+            if (el['tags']['website']) {
+              is_cool = 1;
+              var content = '<div>Website: <a target="_blank" href="' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
+              popup_content = popup_content + content;
+            }
+
+            if (el['tags']['opening_hours']) {
+              var content = '<div>Opening Hours: ' + el['tags']['opening_hours'] +'</div>';
+              popup_content = popup_content + content;
+            }
+
+            var icon;
+            if (is_cool == 1) {
+              icon = cool_icon;
+            } else {
+              icon = not_cool_icon;
+            }
+            L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);
+          }
         }
 
-        if (lat && lon) {
-          if (el['tags']['contact:instagram']) {
-            is_cool = 1
-            base_instagram = el['tags']['contact:instagram'].split('/').filter(i => i).pop()
-            instagram_content = '<div>Instagram: <a target="_blank" href="https://www.instagram.com/' + base_instagram + '">' + base_instagram + '</a></div>';
-            popup_content = popup_content + instagram_content;
-          }
-
-          if (el['tags']['contact:tiktok']) {
-            is_cool = 1
-            base_tiktok = el['tags']['contact:tiktok'].split('/').filter(i => i).pop()
-            tiktok_content = '<div>tiktok: <a target="_blank" href="https://www.tiktok.com/@' + base_tiktok + '">' + base_tiktok + '</a></div>';
-            popup_content = popup_content + tiktok_content;
-          }
-
-          if (el['tags']['opening_hours']) {
-            var content = '<div>Opening Hours: ' + el['tags']['opening_hours'] +'</div>';
-            popup_content = popup_content + content;
-          }
-
-          if (el['tags']['website']) {
-            content = '<div>Website: <a target="_blank" href="' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
-            popup_content = popup_content + content;
-          }
-          var icon;
-          if (is_cool == 1) {
-            icon = cool_icon;
-          } else {
-            icon = not_cool_icon;
-          }
-          L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);
+        done_elements = done_elements + 1;
+        if (done_elements>=n_elements) {
           $('#loader').hide();
         }
-      }
-    });
+      });
+    }
+
     
 
   });
@@ -202,7 +242,7 @@
 <div id="summary">
   <div id="summary_intro"></div>
   <div id="cool_factor">
-    The places without an Instagram or TikTok contact are more transparent because it is quite sure they are not cool enough 
+    If you add/edit a place don't forget to add the contact address of the location on Instagram, TikTok and Facebook!
   </div>
 </div>
 <div id="loader"></div>
