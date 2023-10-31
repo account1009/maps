@@ -224,9 +224,12 @@
               popup_content = popup_content + facebook_content;
             }
 
-            if (el['tags']['website']) {
+
+            var website = el['tags']['website'] || el['tags']['contact:website']
+
+            if (website) {
               is_cool = 1;
-              var content = '<div>Website: <a target="_blank" href="' + el['tags']['website'] + '">' + el['tags']['website'] + '</a></div>';
+              var content = '<div>Website: <a target="_blank" href="' + website + '">' + website + '</a></div>';
               popup_content = popup_content + content;
             }
 
