@@ -134,11 +134,12 @@
       },
       'board_games': {
         'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:club=board_games',
-        'name': 'Board games clubs/cafes/pubs',
+        'additional_wiki': {'name': 'cafe', 'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:cafe=board_game'},
+        'name': 'Board games clubs/cafes',
         'elements': [
           {'key': 'club', 'value': 'board_games', 'color': '#0084ffcf'},
           {'key': 'cafe', 'value': 'board_game', 'color': '#ff0000cf'},
-          {'key': 'pub', 'value': 'board_game', 'color': '#ffa600cf'},
+          // {'key': 'pub', 'value': 'board_game', 'color': '#ffa600cf'},
         ]},
       'live_music': {
         'elements': [{'key': 'live_music', 'value': 'yes', 'color': '#0084ffcf'}],
@@ -157,6 +158,10 @@
     var selected_tag = url_params.get('m')
 
     var summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
+
+    if (cool_tags[selected_tag]['additional_wiki']) {
+      summary = summary + ' (for a ' + cool_tags[selected_tag]['additional_wiki']['name'] +' check <a href="' + cool_tags[selected_tag]['additional_wiki']['wiki'] + '" target="_blank">this other guide</a>)';
+    }
 
     document.title = cool_tags[selected_tag]['name'] + ' - map';
     $('#summary_intro').html(summary);
