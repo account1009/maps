@@ -142,7 +142,10 @@
           // {'key': 'pub', 'value': 'board_game', 'color': '#ffa600cf'},
         ]},
       'live_music': {
-        'elements': [{'key': 'live_music', 'value': 'yes', 'color': '#0084ffcf'}],
+        'elements': [
+            {'key': 'tourism', 'value': 'attraction', 'color': '#ff8b00eb', 'secondary_key': 'live_music', 'secondary_value': 'yes'},
+            {'key': 'live_music', 'value': 'yes', 'color': '#0084ffcf'},
+        ],
         'wiki': 'https://wiki.openstreetmap.org/wiki/Key:live_music',
         'name': 'Live music locations',
       },
@@ -182,8 +185,13 @@
     var n_elements = elements_in_category.length;
     var done_elements = 0;
     for (var j = 0; j < n_elements; j++) {
-      categories = elements_in_category[j];
-      var query = '[out:json][timeout:25];nwr["' + categories['key'] + '"="'  + categories['value'] + '"];out geom;';
+      var categories = elements_in_category[j];
+      var main_key_value = '["' + categories['key'] + '"="'  + categories['value'] + '"]';
+      var secondary_key_value = '';
+      if (categories['secondary_key']) {
+        secondary_key_value = '["' + categories['secondary_key'] + '"="'  + categories['secondary_value'] + '"]';        
+      };
+      var query = '[out:json][timeout:25];nwr' + main_key_value + secondary_key_value +';out geom;';
       var full_json = $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
         var elements = data['elements'];
         for (var i = 0; i < elements.length; i++) {
