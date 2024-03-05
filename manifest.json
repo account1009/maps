@@ -4,7 +4,7 @@
   "id": "https://account1009.github.io/maps=live_music&source=pwa",
   "start_url": "https://account1009.github.io/maps/?m=live_music&source=pwa",
   "background_color": "#3367D6",
-  "display": "standalone",
+  "display": "browser",
   "scope": "https://account1009.github.io/maps/",
   "theme_color": "#3367D6",
   "shortcuts": [

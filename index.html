@@ -193,7 +193,7 @@
     } catch (e) {}
 
     try {
-      var source = parseInt(url_params.get('source'));
+      var source = url_params.get('source');
       if (source == 'pwa') {
         $('#summary').hide();
       }
