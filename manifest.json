@@ -1,8 +1,8 @@
 {
   "short_name": "Interactive Maps",
   "name": "Interactive Maps",
-  "id": "/?m=live_music&source=pwa",
-  "start_url": "/?m=live_music&source=pwa",
+  "id": "https://account1009.github.io/maps=live_music&source=pwa",
+  "start_url": "https://account1009.github.io/maps/?m=live_music&source=pwa",
   "background_color": "#3367D6",
   "display": "standalone",
   "scope": "https://account1009.github.io/maps/",
@@ -12,13 +12,13 @@
       "name": "Board games clubs/cafes",
       "short_name": "Board Games",
       "description": "Board games clubs/cafes",
-      "url": "/?m=board_games&source=pwa"
+      "url": "https://account1009.github.io/maps/?m=board_games&source=pwa"
     },
     {
       "name": "Live music locations",
       "short_name": "Live music",
       "description": "Live music locations",
-      "url": "/?m=live_music&source=pwa"
+      "url": "https://account1009.github.io/maps/?m=live_music&source=pwa"
     }
   ],
   "description": "Interactive Maps"
