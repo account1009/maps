@@ -192,6 +192,13 @@
       }
     } catch (e) {}
 
+    try {
+      var source = parseInt(url_params.get('source'));
+      if (source == 'pwa') {
+        $('#summary').hide();
+      }
+    } catch (e) {}
+
     var summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
 
     if (cool_tags[selected_tag]['additional_wiki']) {
