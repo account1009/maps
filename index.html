@@ -184,6 +184,13 @@
     var url_params = new URLSearchParams(query_string);
     var selected_tag = url_params.get('m');
 
+    try {
+      var is_minimal = parseInt(url_params.get('minimal'));
+      if (is_minimal == 1) {
+        $('#summary').hide();
+      }
+    } catch (e) {}
+
     var summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
 
     if (cool_tags[selected_tag]['additional_wiki']) {
