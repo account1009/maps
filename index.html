@@ -112,7 +112,7 @@ function country_to_location(country) {
 }
 
 function check_category(data, tags) {
-  for (const i = 0; i < tags.length; i++) {
+  for (let i = 0; i < tags.length; i++) {
     const tag = tags[i];
     const key = tag['key'];
     const value = tag['value']
@@ -232,7 +232,7 @@ $(function() {
 
   const n_elements = elements_in_category.length;
   let done_elements = 0;
-  for (const j = 0; j < n_elements; j++) {
+  for (let j = 0; j < n_elements; j++) {
     const categories = elements_in_category[j];
     const main_key_value = '["' + categories['key'] + '"="'  + categories['value'] + '"]';
     let secondary_key_value = '';
@@ -242,7 +242,7 @@ $(function() {
     const query = '[out:json][timeout:25];nwr' + main_key_value + secondary_key_value +';out geom;';
     $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
       const elements = data['elements'];
-      for (const i = 0; i < elements.length; i++) {
+      for (let i = 0; i < elements.length; i++) {
         const el = elements[i];
         const color = check_category(el['tags'], elements_in_category);
         let popup_content = '';
