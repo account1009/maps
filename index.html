@@ -172,6 +172,7 @@ $(function() {
       'elements': [{'key': 'sport', 'value': 'calisthenics', 'color': '#0084ffcf'}],
       'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:sport=calisthenics',
       'name': 'Calisthenics parks',
+      'always_visible': 1,
     },
   };
 
@@ -299,14 +300,15 @@ $(function() {
             popup_content = popup_content + content;
           }
 
+          if (cool_tags[selected_tag]['always_visible'] && cool_tags[selected_tag]['always_visible'] == 1) {
+            is_cool = 1;
+          }
           let icon;
           if (is_cool == 1) {
-
             icon = L.divIcon({
               iconSize: "auto",
               html: '<div class="marker" style="background: ' + color + '"></div>'
             });
-            // icon = cool_icon;
           } else {
             icon = not_cool_icon;
           }
