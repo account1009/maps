@@ -169,7 +169,7 @@ $(function() {
       'name': 'Picnic tables',
     },
     'calisthenics': {
-      'elements': [{'key': 'sport', 'value': 'calisthenics', 'color': '#0084ffcf'}],
+      'elements': [{'key': 'leisure', 'value': 'fitness_station', 'color': '#ff8b00eb', 'secondary_key': 'sport', 'secondary_value': 'calisthenics'}],
       'wiki': 'https://wiki.openstreetmap.org/wiki/Tag:sport=calisthenics',
       'name': 'Calisthenics parks',
       'always_visible': 1,
@@ -237,10 +237,18 @@ $(function() {
     const categories = elements_in_category[j];
     const main_key_value = '["' + categories['key'] + '"="'  + categories['value'] + '"]';
     let secondary_key_value = '';
+
     if (categories['secondary_key']) {
       secondary_key_value = '["' + categories['secondary_key'] + '"="'  + categories['secondary_value'] + '"]';        
     };
+
     const query = '[out:json][timeout:25];nwr' + main_key_value + secondary_key_value +';out geom;';
+    if (cool_tags[selected_tag]['always_visible'] && cool_tags[selected_tag]['always_visible'] == 1) {
+      is_cool = 1;
+      $('#cool_factor').hide();
+      show_popup = 0;
+    }
+
     $.post('https://overpass-api.de/api/interpreter', {'data': query}, function(data, status, xhr) {
       const elements = data['elements'];
       for (let i = 0; i < elements.length; i++) {
@@ -301,11 +309,6 @@ $(function() {
             popup_content = popup_content + content;
           }
 
-          if (cool_tags[selected_tag]['always_visible'] && cool_tags[selected_tag]['always_visible'] == 1) {
-            is_cool = 1;
-            $('#cool_factor').hide();
-            show_popup = 0;
-          }
           let icon;
           if (is_cool == 1) {
             icon = L.divIcon({
@@ -315,8 +318,10 @@ $(function() {
           } else {
             icon = not_cool_icon;
           }
+          let marker = L.marker([lat, lon], {icon: icon});
+          marker.addTo(map);
           if (show_popup == 1) {
-            L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);            
+            marker.bindPopup(popup_content);            
           }
         }
       }
