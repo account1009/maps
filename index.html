@@ -251,6 +251,7 @@ $(function() {
         const name = el['tags']['name'] || '';
         const name_content = '<div><b>' + name +'</b></div>';
         let is_cool = 0;
+        let show_popup = 1;
 
         popup_content = popup_content + name_content;
 
@@ -302,6 +303,8 @@ $(function() {
 
           if (cool_tags[selected_tag]['always_visible'] && cool_tags[selected_tag]['always_visible'] == 1) {
             is_cool = 1;
+            $('#cool_factor').hide();
+            show_popup = 0;
           }
           let icon;
           if (is_cool == 1) {
@@ -312,7 +315,9 @@ $(function() {
           } else {
             icon = not_cool_icon;
           }
-          L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);
+          if (show_popup == 1) {
+            L.marker([lat, lon], {icon: icon}).addTo(map).bindPopup(popup_content);            
+          }
         }
       }
 
