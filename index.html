@@ -209,7 +209,7 @@ $(function() {
     }
   } catch (e) {}
 
-  const summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
+  let summary = 'This is the interactive map of all the <b class="main_topic">' + cool_tags[selected_tag]['name'].toLowerCase() + '</b> - Correct or add a new one using <a href="' + cool_tags[selected_tag]['wiki'] + '" target="_blank">this guide</a>!';
 
   if (cool_tags[selected_tag]['additional_wiki']) {
     summary = summary + ' (for a ' + cool_tags[selected_tag]['additional_wiki']['name'] +' check <a href="' + cool_tags[selected_tag]['additional_wiki']['wiki'] + '" target="_blank">this other guide</a>)';
